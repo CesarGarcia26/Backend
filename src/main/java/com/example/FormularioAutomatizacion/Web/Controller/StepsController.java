@@ -2,6 +2,7 @@ package com.example.FormularioAutomatizacion.Web.Controller;
 
 import com.example.FormularioAutomatizacion.Dto.DtoSteps.DtoMasterSaludColectiva;
 import com.example.FormularioAutomatizacion.Dto.DtoSteps.DtoMasterSaludVida;
+import com.example.FormularioAutomatizacion.Service.AsyncProcessingService;
 import com.example.FormularioAutomatizacion.Service.ServiceEmailSaludColectiva;
 import com.example.FormularioAutomatizacion.Service.iServiceImpleRellenado;
 import com.example.FormularioAutomatizacion.Service.iServiceImpleSeguroVida;
@@ -18,15 +19,18 @@ public class StepsController {
     private final iServiceImpleRellenado rellenadoService;
     private final ServiceEmailSaludColectiva serviceEmail;
     private final iServiceImpleSeguroVida seguroVida;
+    private final AsyncProcessingService asyncProcessingService;
 
     public StepsController(
             iServiceImpleRellenado rellenadoService,
             ServiceEmailSaludColectiva serviceEmail,
-            iServiceImpleSeguroVida seguroVida
+            iServiceImpleSeguroVida seguroVida,
+            AsyncProcessingService asyncProcessingService
     ) {
         this.rellenadoService = rellenadoService;
         this.serviceEmail = serviceEmail;
         this.seguroVida = seguroVida;
+        this.asyncProcessingService = asyncProcessingService;
     }
 
 
@@ -47,16 +51,14 @@ public class StepsController {
 
     }
 
-
-
     @PostMapping("/guardar")
-    public ResponseEntity<byte[]> guardarDatos(@RequestBody DtoMasterSaludVida dto) throws Exception {
-        System.out.println("\n========== DATOS RECIBIDOS SALUD VIDA ==========");
+    public ResponseEntity<Map<String, String>> guardarDatos(
+            @RequestBody DtoMasterSaludVida dto) {
 
-        // Generar documento Word con placeholders
-        ResponseEntity<byte[]> respuestaWord = seguroVida.fillWordFormVida(dto);
-        // Enviar correo con adjunto usando el nuevo mé todo
-        serviceEmail.enviarFormularioPorCorreo(dto, respuestaWord.getBody());
-        return respuestaWord;
+        asyncProcessingService.procesarEnSegundoPlano(dto);
+
+        return ResponseEntity.ok(Map.of(
+                "mensaje", "Formulario recibido. El documento será enviado al correo."
+        ));
     }
 }
