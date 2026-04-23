@@ -11,7 +11,7 @@ import com.example.FormularioAutomatizacion.repository.InfoEmpresaRepository;
 import java.util.Base64;
 import com.resend.Resend;
 import com.resend.services.emails.model.Attachment;
-import com.resend.services.emails.model.SendEmailRequest;
+import com.resend.services.emails.model.CreateEmailOptions;
 
 import jakarta.mail.internet.MimeMessage;
 import jakarta.servlet.http.Cookie;
@@ -149,7 +149,7 @@ public class ServiceEmailSaludColectiva {
 
         String base64File = Base64.getEncoder().encodeToString(fileBytes);
 
-        SendEmailRequest emailRequest = SendEmailRequest.builder()
+        CreateEmailOptions emailRequest = CreateEmailOptions.builder()
                 .from("PactoArrubla <onboarding@resend.dev>")
                 .to(List.of(destinatario))
                 .subject("Solicitud de " + tipoFormulario + " - " + nombreCompleto.toUpperCase())
