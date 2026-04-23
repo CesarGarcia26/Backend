@@ -42,10 +42,9 @@ public class iServiceImpleSeguroVida {
              XWPFDocument document = new XWPFDocument(templateStream);
              ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
 
-            String currentUsername = username; // ← USA EL PARÁMETRO
-
-            EntityUser user = userRepository.findByUsername(currentUsername)
-                    .orElseThrow(() -> new RuntimeException("Usuario no encontrado: " + currentUsername));
+            // REEMPLAZAR con:
+            EntityUser user = userRepository.findByUsernameWithEmpresa(username)
+                    .orElseThrow(() -> new RuntimeException("Usuario no encontrado: " + username));
 
             EntityInfoEmpresas empresa = user.getEmpresa();
             if (empresa == null) {
