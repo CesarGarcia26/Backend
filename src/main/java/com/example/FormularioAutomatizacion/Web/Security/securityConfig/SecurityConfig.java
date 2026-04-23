@@ -36,6 +36,9 @@ public class SecurityConfig {
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         // Endpoints públicos
+
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
                         .requestMatchers(HttpMethod.POST, "/api/ubicacion/login").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/ubicacion/departamentos/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/ubicacion/ciudades/**").permitAll()
