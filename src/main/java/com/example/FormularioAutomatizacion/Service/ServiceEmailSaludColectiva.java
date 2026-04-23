@@ -7,6 +7,12 @@ import com.example.FormularioAutomatizacion.Entity.correos;
 import com.example.FormularioAutomatizacion.Web.Security.jwt.JwtUtil;
 import com.example.FormularioAutomatizacion.repository.CorreosRepository;
 import com.example.FormularioAutomatizacion.repository.InfoEmpresaRepository;
+
+import java.util.Base64;
+import com.resend.Resend;
+import com.resend.services.emails.model.Attachment;
+import com.resend.services.emails.model.SendEmailRequest;
+
 import jakarta.mail.internet.MimeMessage;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,6 +23,7 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+
 
 import java.util.List;
 
@@ -108,80 +115,54 @@ public class ServiceEmailSaludColectiva {
         String colorPrimario = colors[0];
         String colorSecundario = colors[1];
 
-        MimeMessage message = mailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-
-        helper.setTo(destinatario);
-        helper.setSubject("Solicitud de " + tipoFormulario + " - " + nombreCompleto.toUpperCase());
-
         String htmlMsg = """
         <!DOCTYPE html>
         <html>
-        <head>
-            <meta charset="UTF-8">
-        </head>
-        <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, %s 0%%, %s 100%%); min-height: 100vh;">
+        <head><meta charset="UTF-8"></head>
+        <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
             <table width="100%%" cellpadding="0" cellspacing="0" style="padding: 40px 20px;">
                 <tr>
                     <td align="center">
-                        <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); overflow: hidden;">
-                            
+                        <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 16px; overflow: hidden;">
                             <tr>
                                 <td style="background: linear-gradient(135deg, %s 0%%, %s 100%%); padding: 40px 30px; text-align: center;">
-                                    <h1 style="color: #ffffff; margin: 0; font-size: 28px;">Solicitud de %s</h1>
+                                    <h1 style="color: #ffffff; margin: 0;">Solicitud de %s</h1>
                                     <p style="color: rgba(255,255,255,0.95); margin-top: 10px;">Generado para %s</p>
                                 </td>
                             </tr>
-
                             <tr>
                                 <td style="padding: 40px 30px;">
-                                    <p style="color: #333; font-size: 15px; line-height: 1.8;">
-                                        Tu solicitud de <strong style="color: %s;">%s</strong> ha sido recibida.
-                                    </p>
-                                    <p style="color: #333; font-size: 15px; line-height: 1.8;">
-                                        Adjunto encontrarás el formulario con la información proporcionada.
-                                    </p>
-
-                                    <div style="background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; border-radius: 8px;">
-                                        ⚠️ Revisa que toda la información sea correcta.
-                                    </div>
-
-                                    <p style="color: #888; font-size: 13px; text-align: center; margin-top: 30px;">
-                                        Si tienes dudas, contáctanos.
-                                    </p>
+                                    <p style="color: #333;">Tu solicitud de <strong>%s</strong> ha sido recibida.</p>
+                                    <p style="color: #333;">Adjunto encontrarás el formulario con la información proporcionada.</p>
                                 </td>
                             </tr>
-
-                            <tr>
-                                <td style="background-color: #f8f9fa; padding: 30px; text-align: center;">
-                                    <p style="color: %s; font-size: 18px; font-weight: 600;">
-                                        Equipo PactoArrubla
-                                    </p>
-                                </td>
-                            </tr>
-
                         </table>
                     </td>
                 </tr>
             </table>
         </body>
         </html>
-        """.formatted(
-                colorPrimario, colorSecundario,
-                colorPrimario, colorSecundario,
-                tipoFormulario, empresa,
-                colorPrimario, tipoFormulario,
-                colorPrimario
-        );
+    """.formatted(colorPrimario, colorSecundario, tipoFormulario, empresa, tipoFormulario);
 
-        helper.setText(htmlMsg, true);
+        String resendApiKey = System.getenv("RESEND_API_KEY");
+        Resend resend = new Resend(resendApiKey);
 
-        helper.addAttachment(
-                "formulario-" + tipoFormulario.replace(" ", "_").toLowerCase() + ".docx",
-                new ByteArrayResource(fileBytes)
-        );
+        String base64File = Base64.getEncoder().encodeToString(fileBytes);
 
-        mailSender.send(message);
+        SendEmailRequest emailRequest = SendEmailRequest.builder()
+                .from("PactoArrubla <onboarding@resend.dev>")
+                .to(List.of(destinatario))
+                .subject("Solicitud de " + tipoFormulario + " - " + nombreCompleto.toUpperCase())
+                .html(htmlMsg)
+                .attachments(List.of(
+                        Attachment.builder()
+                                .fileName("formulario-" + tipoFormulario.replace(" ", "_").toLowerCase() + ".docx")
+                                .content(base64File)
+                                .build()
+                ))
+                .build();
+
+        resend.emails().send(emailRequest);
         System.out.println("📧 Enviado a: " + destinatario);
     }
 
