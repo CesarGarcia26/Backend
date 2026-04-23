@@ -51,7 +51,7 @@ public class AuthController {
             cookie.setHttpOnly(true);
             cookie.setSecure(true);       // ✅ HTTPS en producción
             cookie.setPath("/");
-            cookie.setMaxAge(3600);
+            cookie.setMaxAge(28800);
             cookie.setAttribute("SameSite", "None"); // ✅ permite cross-domain
 
             response.addCookie(cookie);
