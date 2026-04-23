@@ -36,29 +36,26 @@ public class AuthController {
 
         if (passwordEncoder.matches(password, user.getPassword())) {
 
-            // Validar empresa para evitar NullPointer
             String nombreEmpresa = (user.getEmpresa() != null)
                     ? user.getEmpresa().getNombreEmpresa()
                     : "Sin empresa";
 
-            // Generar el token
             String token = JwtUtil.generateToken(
                     user.getUsername(),
                     nombreEmpresa,
                     Collections.singletonMap("email", user.getEmail())
             );
 
-            // 🔐 CAMBIO CRÍTICO: Enviar token en cookie httpOnly
+            // ✅ Configuración correcta para producción
             Cookie cookie = new Cookie("token", token);
-            cookie.setHttpOnly(true); // No accesible desde JavaScript (protección XSS)
-            cookie.setSecure(false); // ⚠️ Cambiar a true en producción (requiere HTTPS)
+            cookie.setHttpOnly(true);
+            cookie.setSecure(true);       // ✅ HTTPS en producción
             cookie.setPath("/");
-            cookie.setMaxAge(3600); // 1 hora en segundos
-            cookie.setAttribute("SameSite", "Lax"); // Protección CSRF
+            cookie.setMaxAge(3600);
+            cookie.setAttribute("SameSite", "None"); // ✅ permite cross-domain
 
             response.addCookie(cookie);
 
-            // Retornar datos del usuario (SIN el token)
             Map<String, String> responseBody = new HashMap<>();
             responseBody.put("username", user.getUsername());
             responseBody.put("empresa", nombreEmpresa);
@@ -72,7 +69,6 @@ public class AuthController {
         }
     }
 
-    // 🆕 NUEVO ENDPOINT: Verificar si el usuario está autenticado
     @GetMapping("/me")
     public ResponseEntity<?> getCurrentUser(Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {
@@ -95,14 +91,14 @@ public class AuthController {
         return ResponseEntity.ok(userInfo);
     }
 
-    // 🆕 NUEVO ENDPOINT: Logout (limpiar cookie)
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletResponse response) {
         Cookie cookie = new Cookie("token", null);
         cookie.setHttpOnly(true);
-        cookie.setSecure(false); // ⚠️ true en producción
+        cookie.setSecure(true);          // ✅ HTTPS en producción
         cookie.setPath("/");
-        cookie.setMaxAge(0); // Eliminar cookie inmediatamente
+        cookie.setMaxAge(0);
+        cookie.setAttribute("SameSite", "None"); // ✅ permite cross-domain
 
         response.addCookie(cookie);
 
