@@ -193,25 +193,26 @@ public class ServiceEmailSaludColectiva {
             String nombreCompleto,
             byte[] fileBytes
     ) throws Exception {
-
-        // 1. Obtener empresa desde token
         String empresa = obtenerEmpresaDelToken();
+        enviarFormularioPorCorreo(tipoFormulario, nombreCompleto, fileBytes, empresa);
+    }
 
-        // 2. Buscar empresa por nombre (RETORNA OPTIONAL)
+    public void enviarFormularioPorCorreo(
+            String tipoFormulario,
+            String nombreCompleto,
+            byte[] fileBytes,
+            String empresa
+    ) throws Exception {
         EntityInfoEmpresas empresaEntity =
                 empresaRepo.findByNombreEmpresa(empresa)
                         .orElseThrow(() -> new RuntimeException("❌ Empresa no encontrada: " + empresa));
 
-        // Tu entity usa int, no Long
         long idEmpresa = empresaEntity.getIdEmpresa();
-
-        // 3. Buscar correos asociados
         List<correos> correos = correoRepo.findByIdEmpresa(idEmpresa);
 
         if (correos.isEmpty())
             throw new RuntimeException("❌ La empresa no tiene correos registrados");
 
-        // 4. Enviar a todos los correos
         for (correos correo : correos) {
             enviarCorreoIndividual(
                     correo.getCorreo(),
@@ -229,5 +230,9 @@ public class ServiceEmailSaludColectiva {
 
     public void enviarFormularioPorCorreo(DtoMasterSaludVida dto, byte[] fileBytes) throws Exception {
         enviarFormularioPorCorreo("Vida Grupo", dto.getNombreCompleto(), fileBytes);
+    }
+
+    public void enviarFormularioPorCorreo(DtoMasterSaludVida dto, byte[] fileBytes, String empresa) throws Exception {
+        enviarFormularioPorCorreo("Vida Grupo", dto.getNombreCompleto(), fileBytes, empresa);
     }
 }

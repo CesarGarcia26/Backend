@@ -573,4 +573,9 @@ public class iServiceImpleSeguroVida {
     private String nullSafe(String value) {
         return value != null ? value : "";
     }
+    public String getEmpresaByUsername(String username) {
+        EntityUser user = userRepository.findByUsernameWithEmpresa(username)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado: " + username));
+        return user.getEmpresa().getNombreEmpresa();
+    }
 }

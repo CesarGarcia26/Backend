@@ -23,8 +23,11 @@ public class AsyncProcessingService {
             System.out.println("⚙️ Iniciando generación de documento...");
             ResponseEntity<byte[]> respuestaWord = seguroVida.fillWordFormVida(dto, username);
 
+            // Obtener empresa del usuario
+            String empresa = seguroVida.getEmpresaByUsername(username);
+
             System.out.println("📧 Enviando correo...");
-            serviceEmail.enviarFormularioPorCorreo(dto, respuestaWord.getBody());
+            serviceEmail.enviarFormularioPorCorreo(dto, respuestaWord.getBody(), empresa);
 
             System.out.println("✅ Proceso completado exitosamente");
         } catch (Exception e) {
