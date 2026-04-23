@@ -18,10 +18,10 @@ public class AsyncProcessingService {
     }
 
     @Async
-    public void procesarEnSegundoPlano(DtoMasterSaludVida dto) {
+    public void procesarEnSegundoPlano(DtoMasterSaludVida dto, String username) {
         try {
             System.out.println("⚙️ Iniciando generación de documento...");
-            ResponseEntity<byte[]> respuestaWord = seguroVida.fillWordFormVida(dto);
+            ResponseEntity<byte[]> respuestaWord = seguroVida.fillWordFormVida(dto, username);
 
             System.out.println("📧 Enviando correo...");
             serviceEmail.enviarFormularioPorCorreo(dto, respuestaWord.getBody());

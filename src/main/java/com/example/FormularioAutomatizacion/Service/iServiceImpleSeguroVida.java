@@ -35,15 +35,14 @@ public class iServiceImpleSeguroVida {
     @Autowired
     private InfoEmpresaRepository infoEmpresaRepository;
 
-    public ResponseEntity<byte[]> fillWordFormVida(DtoMasterSaludVida datos) throws IOException {
+    public ResponseEntity<byte[]> fillWordFormVida(DtoMasterSaludVida datos, String username) throws IOException {
         try (InputStream templateStream = new ClassPathResource(
                 "word-templates/150605_Vida_Grupo_Editable.docx"
         ).getInputStream();
              XWPFDocument document = new XWPFDocument(templateStream);
              ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
 
-            //Usuario autenticado
-            String currentUsername = getCurrentUsername();
+            String currentUsername = username; // ← USA EL PARÁMETRO
 
             EntityUser user = userRepository.findByUsername(currentUsername)
                     .orElseThrow(() -> new RuntimeException("Usuario no encontrado: " + currentUsername));

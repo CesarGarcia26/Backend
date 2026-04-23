@@ -6,6 +6,7 @@ import com.example.FormularioAutomatizacion.Service.AsyncProcessingService;
 import com.example.FormularioAutomatizacion.Service.ServiceEmailSaludColectiva;
 import com.example.FormularioAutomatizacion.Service.iServiceImpleRellenado;
 import com.example.FormularioAutomatizacion.Service.iServiceImpleSeguroVida;
+import org.springframework.security.core.Authentication;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -52,13 +53,10 @@ public class StepsController {
     }
 
     @PostMapping("/guardar")
-    public ResponseEntity<Map<String, String>> guardarDatos(
-            @RequestBody DtoMasterSaludVida dto) {
-
-        asyncProcessingService.procesarEnSegundoPlano(dto);
-
-        return ResponseEntity.ok(Map.of(
-                "mensaje", "Formulario recibido. El documento será enviado al correo."
-        ));
+    public ResponseEntity<?> guardarDatos(@RequestBody DtoMasterSaludVida dto, Authentication authentication) throws Exception {
+        System.out.println("\n========== DATOS RECIBIDOS SALUD VIDA ==========");
+        String username = authentication.getName();
+        asyncProcessingService.procesarEnSegundoPlano(dto, username);
+        return ResponseEntity.ok(Map.of("message", "Formulario recibido, procesando..."));
     }
 }
