@@ -52,7 +52,8 @@ public class iServiceImpleSeguroVida {
             if (empresa == null) {
                 throw new RuntimeException("El usuario no tiene una empresa asignada");
             }
-            System.out.println(datos.getAlcoholismoActual()); System.out.println(datos.getDetalleAlcoholismoActual());
+            System.out.println(datos.getAlcoholismoActual());
+            System.out.println(datos.getDetalleAlcoholismoActual());
 
 
             Map<String, String> placeholders = new HashMap<>();
@@ -156,7 +157,7 @@ public class iServiceImpleSeguroVida {
             final int MAX_ENFERMEDADES = 5;
             while (detalleEnfermedadesCombinadas.size() < MAX_ENFERMEDADES) {
                 // rellenar con vacíos para no romper placeholders
-                Map<String,String> filaVacia = new HashMap<>();
+                Map<String, String> filaVacia = new HashMap<>();
                 filaVacia.put("numAsegurado", "");
                 filaVacia.put("medico", "");
                 filaVacia.put("institucion", "");
@@ -169,7 +170,7 @@ public class iServiceImpleSeguroVida {
 // 🔹 Reemplazo en placeholders del Word
 // =====================================
             for (int i = 0; i < MAX_ENFERMEDADES; i++) {
-                Map<String,String> fila = detalleEnfermedadesCombinadas.get(i);
+                Map<String, String> fila = detalleEnfermedadesCombinadas.get(i);
                 placeholders.put("{{asegurado" + i + "}}", fila.get("numAsegurado"));
                 placeholders.put("{{doctor" + i + "}}", fila.get("medico"));
                 placeholders.put("{{institucion" + i + "}}", fila.get("institucion"));
@@ -373,7 +374,6 @@ public class iServiceImpleSeguroVida {
                     idx++;
                 }
             }
-
 
 
             // STEP 13 - Vacunación COVID
