@@ -6,11 +6,11 @@ import com.example.FormularioAutomatizacion.Service.AsyncProcessingService;
 import com.example.FormularioAutomatizacion.Service.ServiceEmailSaludColectiva;
 import com.example.FormularioAutomatizacion.Service.iServiceImpleRellenado;
 import com.example.FormularioAutomatizacion.Service.iServiceImpleSeguroVida;
-import org.springframework.security.core.Authentication;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -34,29 +34,24 @@ public class StepsController {
         this.asyncProcessingService = asyncProcessingService;
     }
 
+    // ✅ Salud Colectiva — público, async
+    @PostMapping("/guardar-colectiva")
+    public ResponseEntity<Map<String, String>> generarFormulario(
+            @RequestBody DtoMasterSaludColectiva formulario) {
 
-     // Recibe y procesa formularios de Salud Colectiva
-
-    @PostMapping
-    public ResponseEntity<byte[]> generarFormulario(@RequestBody DtoMasterSaludColectiva formulario) throws Exception {
-        System.out.println("\n===============================================");
-        System.out.println("FORMULARIO SALUD COLECTIVA RECIBIDO");
-        System.out.println("===============================================");
-
-        ResponseEntity<byte[]> respuestaWord = rellenadoService.fillWordForm(formulario);
-        // Enviar correo con adjunto usando el nuevo mét odo
-        serviceEmail.enviarFormularioPorCorreo(formulario, respuestaWord.getBody());
-
-        return respuestaWord;
-
-
+        asyncProcessingService.procesarColectivaEnSegundoPlano(formulario);
+        return ResponseEntity.ok(Map.of("mensaje", "Formulario recibido. El documento será enviado al correo."));
     }
 
+    // ✅ Salud Vida — requiere JWT, lee username del contexto
     @PostMapping("/guardar")
-    public ResponseEntity<?> guardarDatos(@RequestBody DtoMasterSaludVida dto, Authentication authentication) throws Exception {
-        System.out.println("\n========== DATOS RECIBIDOS SALUD VIDA ==========");
-        String username = authentication.getName();
+    public ResponseEntity<Map<String, String>> guardarDatos(
+            @RequestBody DtoMasterSaludVida dto) {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName(); // ← viene del token JWT
+
         asyncProcessingService.procesarEnSegundoPlano(dto, username);
-        return ResponseEntity.ok(Map.of("message", "Formulario recibido, procesando..."));
+        return ResponseEntity.ok(Map.of("mensaje", "Formulario recibido. El documento será enviado al correo."));
     }
 }

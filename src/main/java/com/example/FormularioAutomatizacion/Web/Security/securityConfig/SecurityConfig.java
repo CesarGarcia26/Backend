@@ -46,6 +46,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/ubicacion/enfermedades").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/ubicacion/user/**").permitAll()
 
+                        .requestMatchers(HttpMethod.POST, "/api/ubicacion/guardar-colectiva").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/ubicacion/guardar").permitAll()
 
                         // Resto protegido
